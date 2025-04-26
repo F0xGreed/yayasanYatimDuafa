@@ -38,14 +38,20 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
 });
 
 
-// Lupa Password
+// Password Change (Ubah Password Saat Login)
+Route::middleware('auth')->group(function () {
+    Route::get('/password/edit', [ProfileController::class, 'edit'])->name('password.edit');
+    Route::post('/password/update', [ProfileController::class, 'update'])->name('password.update');
+});
+
+// Lupa Password (Request Reset Link)
 Route::get('/forgot-password', [PasswordResetLinkController::class, 'create'])
     ->middleware('guest')->name('password.request');
 Route::post('/forgot-password', [PasswordResetLinkController::class, 'store'])
     ->middleware('guest')->name('password.email');
 
-// Reset Password
+// Reset Password (Setel Ulang Password Lewat Link Email)
 Route::get('/reset-password/{token}', [NewPasswordController::class, 'create'])
     ->middleware('guest')->name('password.reset');
 Route::post('/reset-password', [NewPasswordController::class, 'store'])
-    ->middleware('guest')->name('password.update');
+    ->middleware('guest')->name('password.store'); // <--- Ganti dari 'password.update' ke 'password.store'

@@ -4,17 +4,22 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Password;
-use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Hash;
 
 class NewPasswordController extends Controller
 {
-    public function create(string $token)
+    /**
+     * Tampilkan form untuk membuat password baru.
+     */
+    public function create(Request $request)
     {
-        return view('auth.reset-password', ['token' => $token]);
+        return view('auth.reset-password', ['token' => $request->route('token')]);
     }
 
+    /**
+     * Simpan password baru.
+     */
     public function store(Request $request)
     {
         $request->validate([
@@ -25,16 +30,14 @@ class NewPasswordController extends Controller
 
         $status = Password::reset(
             $request->only('email', 'password', 'password_confirmation', 'token'),
-            function ($user) use ($request) {
-                $user->forceFill([
-                    'password' => Hash::make($request->password),
-                    'remember_token' => Str::random(60),
-                ])->save();
+            function ($user, $password) {
+                $user->password = Hash::make($password);
+                $user->save();
             }
         );
 
-        return $status === Password::PASSWORD_RESET
-            ? redirect()->route('login')->with('status', __($status))
-            : back()->withErrors(['email' => [__($status)]]);
+        return $status == Password::PASSWORD_RESET
+                    ? redirect()->route('login')->with('success', 'Password berhasil diubah. Silahkan login kembali.')
+                    : back()->withErrors(['email' => [__($status)]]);
     }
 }
