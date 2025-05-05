@@ -20,22 +20,28 @@ class AuthController extends Controller
     }
 
     public function login(Request $request)
-    {
-        $credentials = $request->validate([
-            'email' => 'required|email',
-            'password' => 'required'
-        ]);
+{
+    $credentials = $request->only('email', 'password');
 
-        if (Auth::attempt($credentials)) {
-            // Regenerasi session untuk keamanan
-            $request->session()->regenerate();
+    if (Auth::attempt($credentials)) {
+        $user = Auth::user();
 
-            // Redirect ke halaman yang diminta sebelumnya atau dashboard
-            return redirect()->intended('/dashboard');
+        if ($user->role === 'admin') {
+            return redirect()->route('dashboard.admin');
+        } elseif ($user->role === 'bendahara') {
+            return redirect()->route('dashboard.bendahara');
+        } elseif ($user->role === 'anggota') {
+            return redirect()->route('dashboard.anggota');
+        } else {
+            Auth::logout();
+            return redirect()->route('login')->withErrors(['Akses tidak diizinkan.']);
         }
-
-        return back()->withErrors(['email' => 'Email atau password salah!']);
     }
+
+    return back()->withErrors(['email' => 'Email atau password salah.'])->withInput();
+}
+
+
 
     public function register(Request $request)
     {

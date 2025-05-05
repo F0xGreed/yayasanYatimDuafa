@@ -1,13 +1,32 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\DonorController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\Auth\PasswordResetLinkController;
 use App\Http\Controllers\Auth\NewPasswordController;
+
+
+// Route::get('/', function () {
+//     return view('landing');
+// })->name('landing');
+
+Route::get('/', function () {
+    if (auth()->check()) {
+        return redirect()->route('dashboard.' . auth()->user()->role);
+    }
+    return view('landing');
+})->name('landing');
+
+// Public - Halaman donasi landing
+Route::get('/donasi', function () {
+    return view('donasi');
+})->name('donasi');
+
+
+
 
 // Auth
 Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
@@ -16,14 +35,26 @@ Route::get('/register', [AuthController::class, 'showRegisterForm'])->name('regi
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
-// Password Change
+// Password Change (Ubah Password Saat Login)
 Route::middleware('auth')->group(function () {
     Route::get('/password/edit', [ProfileController::class, 'edit'])->name('password.edit');
     Route::post('/password/update', [ProfileController::class, 'update'])->name('password.update');
 });
 
-// Dashboard
-Route::get('/dashboard', [DashboardController::class, 'index'])->middleware('auth')->name('dashboard');
+// Dashboard khusus masing-masing role
+Route::middleware(['auth'])->group(function () {
+    Route::get('/dashboard/admin', function () {
+        return view('dashboard.admin');
+    })->name('dashboard.admin')->middleware('role:admin');
+
+    Route::get('/dashboard/bendahara', function () {
+        return view('dashboard.bendahara');
+    })->name('dashboard.bendahara')->middleware('role:bendahara');
+
+    Route::get('/dashboard/anggota', function () {
+        return view('dashboard.anggota');
+    })->name('dashboard.anggota')->middleware('role:anggota');
+});
 
 // Donor Resource (CRUD)
 Route::resource('/donors', DonorController::class)->middleware('auth');
@@ -33,15 +64,8 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
     Route::get('/users', [UserController::class, 'index'])->name('users.index');
     Route::get('/users/create', [UserController::class, 'create'])->name('users.create');
     Route::post('/users', [UserController::class, 'store'])->name('users.store');
-    Route::delete('/users/{user}', [UserController::class, 'destroy'])->name('users.destroy'); // <- tambahkan ini
+    Route::delete('/users/{user}', [UserController::class, 'destroy'])->name('users.destroy');
     Route::post('/users/{user}/reset-password', [UserController::class, 'resetPassword'])->name('users.resetPassword');
-});
-
-
-// Password Change (Ubah Password Saat Login)
-Route::middleware('auth')->group(function () {
-    Route::get('/password/edit', [ProfileController::class, 'edit'])->name('password.edit');
-    Route::post('/password/update', [ProfileController::class, 'update'])->name('password.update');
 });
 
 // Lupa Password (Request Reset Link)
@@ -54,4 +78,4 @@ Route::post('/forgot-password', [PasswordResetLinkController::class, 'store'])
 Route::get('/reset-password/{token}', [NewPasswordController::class, 'create'])
     ->middleware('guest')->name('password.reset');
 Route::post('/reset-password', [NewPasswordController::class, 'store'])
-    ->middleware('guest')->name('password.store'); // <--- Ganti dari 'password.update' ke 'password.store'
+    ->middleware('guest')->name('password.store');
