@@ -7,6 +7,7 @@ use App\Http\Controllers\DonorController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\Auth\PasswordResetLinkController;
 use App\Http\Controllers\Auth\NewPasswordController;
+use App\Http\Controllers\PublicDonationController;
 
 
 // Route::get('/', function () {
@@ -25,7 +26,7 @@ Route::get('/donasi', function () {
     return view('donasi');
 })->name('donasi');
 
-
+Route::post('/donasi', [PublicDonationController::class, 'store'])->name('donasi.store');
 
 
 // Auth

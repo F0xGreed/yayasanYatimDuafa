@@ -9,11 +9,25 @@
         body {
             margin: 0;
             font-family: 'Poppins', sans-serif;
-            background: linear-gradient(to right, #FFA500, #FF7F00);
             color: #fff;
             display: flex;
             flex-direction: column;
             height: 100vh;
+            position: relative;
+            background: url('{{ asset('images/pic2.png') }}') no-repeat center center fixed;
+            background-size: cover;
+            z-index: 0;
+        }
+
+        body::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(50, 50, 50, 0.4); /* overlay abu-abu gelap */
+            z-index: -1;
         }
 
         header {
@@ -51,6 +65,7 @@
             align-items: center;
             text-align: center;
             padding: 40px;
+            z-index: 1;
         }
 
         h1 {
@@ -99,12 +114,18 @@
             padding: 20px;
             text-align: center;
             font-size: 0.9rem;
+            z-index: 1;
         }
     </style>
 </head>
 <body>
     <header>
-        <div class="logo">Yayasan Yatim Dhuafa</div>
+        <div class="logo">
+            <img src="{{ asset('images/pic3.png') }}" alt="Logo" style="height: 50px; vertical-align: middle;">
+            <span style="margin-left: 10px;">
+                <a href="/" style="text-decoration: none; color: white;">Yayasan Yatim Dhuafa</a>
+            </span>
+        </div>
         <div class="nav-links">
             <a href="{{ route('login') }}" class="btn-login">Login</a>
         </div>
