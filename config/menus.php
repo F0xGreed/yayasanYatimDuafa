@@ -30,12 +30,6 @@ return [
             'active' => false,
         ],
         [
-            'title' => 'Pengaturan',
-            'icon' => '⚙️',
-            'route' => 'settings.index',
-            'active' => false,
-        ],
-        [
             'title' => 'Rekap Donasi',
             'icon' => '📝',
             'route' => 'rekap-donasi.index',
@@ -72,12 +66,6 @@ return [
             'active' => false,
         ],
         [
-            'title' => 'Pengaturan',
-            'icon' => '⚙️',
-            'route' => 'settings.index',
-            'active' => false,
-        ],
-        [
             'title' => 'Rekap Donasi',
             'icon' => '📝',
             'route' => 'rekap-donasi.index',
@@ -100,6 +88,7 @@ return [
             'title' => 'Kegiatan',
             'icon' => '📅',
             'route' => 'events.index',
+            'active' => false,
         ],
     ],
 ];
