@@ -92,10 +92,21 @@
         }
         }
 
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5); /* Ubah 0.5 sesuai gelap yang diinginkan */
+            z-index: -1;
+        }
+
     </style>
     @stack('styles')
 </head>
-<body style="background-image: url('{{ asset('images/pic2.png') }}'); background-size: cover; background-repeat: no-repeat; background-position: center;">
+<body style="background-image: url('{{ asset('images/pic2.png') }}'); background-size: cover; background-repeat: no-repeat; background-position: center; position: relative;">
     <header style="background-color: #FF7F00; color: white; padding: 20px; text-align: center;">
         <div style="display: flex; justify-content: center; align-items: center; flex-direction: column;">
             <img src="{{ asset('images/pic3.png') }}" alt="Logo" style="height: 50px;">
@@ -106,9 +117,10 @@
 
 
 
-    <main class="container">
-        @yield('content')
+    <main class="container" style="@yield('container-style')">
+    @yield('content')
     </main>
+
 
     <footer>
         &copy; {{ date('Y') }} Yayasan Yatim Dhuafa

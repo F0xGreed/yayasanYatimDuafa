@@ -19,4 +19,19 @@
 
         <button type="submit">Kirim Donasi</button>
     </form>
+
+    {{-- Tombol Kembali ke Beranda --}}
+    <div style="margin-top: 30px;">
+        <a href="{{ url('/') }}" style="
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: #6c757d;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+        " onmouseover="this.style.backgroundColor='#5a6268'" onmouseout="this.style.backgroundColor='#6c757d'">
+            ← Kembali ke Beranda
+        </a>
+    </div>
 @endsection

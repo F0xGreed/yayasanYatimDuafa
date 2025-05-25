@@ -9,20 +9,17 @@ use Illuminate\Support\Str;
 
 class UserController extends Controller
 {
-    // Menampilkan semua akun
     public function index()
     {
-        $users = User::paginate(10); // Tampilkan 10 user per halaman
-        return view('users.index', compact('users'));
+        $users = User::paginate(10);
+        return view('admin.users.index', compact('users'));
     }
-
-
-    // Form buat akun
+    
     public function create()
     {
-        return view('users.create');
+        return view('admin.users.create');
     }
-
+    
     // Simpan akun baru
     public function store(Request $request)
     {

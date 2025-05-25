@@ -10,13 +10,17 @@ class DonorController extends Controller
     public function index()
     {
         $donors = Donor::all();
-        return view('donors.index', compact('donors'));
+        $role = auth()->user()->role;
+
+        return view("$role.donors.index", compact('donors'));
     }
 
     public function create()
     {
-        return view('donors.create');
+        $role = auth()->user()->role;
+        return view("$role.donors.create");
     }
+
 
     public function store(Request $request)
     {
@@ -34,8 +38,10 @@ class DonorController extends Controller
 
     public function edit(Donor $donor)
     {
-        return view('donors.edit', compact('donor'));
+        $role = auth()->user()->role;
+        return view("$role.donors.edit", compact('donor'));
     }
+
 
     public function update(Request $request, Donor $donor)
     {

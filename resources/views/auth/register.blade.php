@@ -26,7 +26,15 @@
             </div>
             <button type="submit" class="btn btn-warning w-100">Daftar</button>
         </form>
-        <p class="mt-3 text-center">Sudah punya akun? <a href="{{ route('login') }}">Login</a></p>
+        <p class="mt-3 text-center">
+            Sudah punya akun? <a href="{{ route('login') }}">Login</a>
+        </p>
+
+        <div class="text-center mt-3">
+            <a href="{{ route('landing') }}" class="btn btn-light text-muted">
+                ← Kembali ke Beranda
+            </a>
+        </div>
     </div>
 </div>
 @endsection

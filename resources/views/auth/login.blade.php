@@ -27,12 +27,18 @@
                 <label class="form-label">Password</label>
                 <input type="password" name="password" class="form-control" required>
                 <div class="mt-2">
-                    <a href="{{ route('password.request') }}" class="text-decoration-none small"> Lupa Password?</a>
+                    <a href="{{ route('password.request') }}" class="text-decoration-none small">Lupa Password?</a>
                 </div>
             </div>
 
             <button type="submit" class="btn btn-warning w-100">Login</button>
         </form>
+
+        <div class="text-center mt-3">
+            <a href="{{ route('landing') }}" class="btn btn-light text-muted">
+                ← Kembali ke Beranda
+            </a>
+        </div>
 
         <p class="mt-3 text-center">
             Belum punya akun? <a href="{{ route('register') }}">Daftar</a>

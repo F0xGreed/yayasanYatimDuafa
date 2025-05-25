@@ -16,7 +16,7 @@ return [
             'title' => 'Donasi',
             'icon' => '💰',
             'route' => 'donations.index',
-            'active' => false,
+            
         ],
         [
             'title' => 'Donatur',
@@ -26,14 +26,12 @@ return [
         [
             'title' => 'Kegiatan',
             'icon' => '📅',
-            'route' => 'events.index',
-            'active' => false,
-        ],
+            'route' => 'campaigns.index',
+        ],        
         [
             'title' => 'Rekap Donasi',
             'icon' => '📝',
             'route' => 'rekap-donasi.index',
-            'active' => false,
         ],
         [
             'title' => 'Laporan Pengeluaran',
@@ -52,7 +50,7 @@ return [
             'title' => 'Donasi',
             'icon' => '💰',
             'route' => 'donations.index',
-            'active' => false,
+            
         ],
         [
             'title' => 'Donatur',
@@ -62,14 +60,12 @@ return [
         [
             'title' => 'Kegiatan',
             'icon' => '📅',
-            'route' => 'events.index',
-            'active' => false,
+            'route' => 'campaigns.index',
         ],
         [
             'title' => 'Rekap Donasi',
             'icon' => '📝',
             'route' => 'rekap-donasi.index',
-            'active' => false,
         ],
         [
             'title' => 'Laporan Pengeluaran',
@@ -87,8 +83,8 @@ return [
         [
             'title' => 'Kegiatan',
             'icon' => '📅',
-            'route' => 'events.index',
-            'active' => false,
+            'route' => 'campaigns.index',
+            
         ],
     ],
 ];
