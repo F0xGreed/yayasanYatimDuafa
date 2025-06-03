@@ -13,6 +13,35 @@ use App\Http\Controllers\CampaignController;
 use App\Http\Controllers\RekapDonasiController;
 use App\Http\Controllers\DashboardController;
 use App\Models\Campaign;
+use App\Http\Controllers\PengeluaranController;
+use App\Http\Controllers\PaymentController;
+use App\Http\Controllers\DonasiTrackingController;
+
+
+// ======================
+// Halaman Donasi Publik
+// ======================
+Route::get('/donasi', fn() => view('public.donasi'))->name('donasi');
+Route::post('/donasi', [PaymentController::class, 'pay'])->name('donasi.pay');
+
+// ======================
+// Halaman Callback Midtrans
+// ======================
+Route::get('/payment/success', fn () => view('payment.success'))->name('payment.success');
+Route::get('/payment/pending', fn () => view('payment.pending'))->name('payment.pending');
+Route::get('/payment/failed', fn () => view('payment.failed'))->name('payment.failed');
+
+
+Route::post('midtrans/notification', [PaymentController::class, 'handleNotification'])->withoutMiddleware([\App\Http\Middleware\VerifyCsrfToken::class]);
+
+// Route::any('midtrans/notification', [PaymentController::class, 'handleNotification']);
+
+
+// Halaman form tracking donasi publik
+Route::get('/donasi/tracking', [DonasiTrackingController::class, 'showForm'])->name('donasi.tracking.form');
+// Proses pencarian berdasarkan order_id
+Route::get('/donasi/tracking/result', [DonasiTrackingController::class, 'showResult'])->name('donasi.tracking.result');
+
 
 
 // ========================
@@ -26,13 +55,6 @@ Route::get('/', function () {
     $campaigns = Campaign::where('tanggal_selesai', '>=', now())->latest()->get();
     return view('public.landing', compact('campaigns'));
 })->name('landing');
-
-
-// ======================
-// Halaman Donasi Publik
-// ======================
-Route::get('/donasi', fn() => view('public.donasi'))->name('donasi');
-Route::post('/donasi', [PublicDonationController::class, 'store'])->name('donasi.store');
 
 
 // =====================
@@ -56,6 +78,19 @@ Route::middleware(['auth', 'role:admin,bendahara'])->group(function () {
 });
 
 
+Route::middleware(['auth'])->group(function () {
+    Route::get('/laporan-pengeluaran', [PengeluaranController::class, 'index'])
+        ->name('laporan-pengeluaran.index')
+        ->middleware('role:admin,bendahara');
+
+    Route::get('/laporan-pengeluaran/export-excel', [PengeluaranController::class, 'exportExcel'])
+        ->name('laporan-pengeluaran.exportExcel')
+        ->middleware('role:admin,bendahara');
+
+    Route::get('/laporan-pengeluaran/export-pdf', [PengeluaranController::class, 'exportPDF'])
+        ->name('laporan-pengeluaran.exportPDF')
+        ->middleware('role:admin,bendahara');
+});
 
 // ===================================================
 // Kampanye (CRUD) - Hanya Admin dan Bendahara
@@ -128,3 +163,5 @@ Route::get('/forgot-password', [PasswordResetLinkController::class, 'create'])->
 Route::post('/forgot-password', [PasswordResetLinkController::class, 'store'])->middleware('guest')->name('password.email');
 Route::get('/reset-password/{token}', [NewPasswordController::class, 'create'])->middleware('guest')->name('password.reset');
 Route::post('/reset-password', [NewPasswordController::class, 'store'])->middleware('guest')->name('password.store');
+
+

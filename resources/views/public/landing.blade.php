@@ -151,7 +151,8 @@
         <p>Bantu anak-anak yatim dan dhuafa mendapatkan kehidupan yang lebih layak melalui program donasi dan kegiatan sosial kami.</p>
         <div>
             <a href="{{ route('donasi') }}" class="btn btn-donasi">Donasi Publik</a>
-            <a href="{{ route('login') }}" class="btn btn-login">Login</a>
+            <a href="{{ route('donasi.tracking.form') }}" class="btn btn-login" style="margin-left: 10px;">🔍 Lacak Donasi</a>
+            <a href="{{ route('login') }}" class="btn btn-login" style="margin-left: 10px;">Login</a>
         </div>
     </main>
 

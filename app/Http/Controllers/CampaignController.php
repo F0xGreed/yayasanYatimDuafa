@@ -7,6 +7,10 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use Midtrans\Snap;
+use Midtrans\Config;
+use App\Models\CampaignDonation;
+
 
 class CampaignController extends Controller
 {
@@ -118,25 +122,47 @@ class CampaignController extends Controller
     }
 
     public function donate(Request $request, $id)
-    {
-        $request->validate([
-            'nama' => 'required|string|max:255',
-            'email' => 'required|email',
-            'telepon' => 'required|string|max:20',
-            'nominal' => 'required|numeric|min:1000',
-            'pesan' => 'nullable|string|max:500',
-        ]);
+{
+    $request->validate([
+        'nama' => 'required|string|max:255',
+        'email' => 'required|email',
+        'telepon' => 'required|string|max:20',
+        'nominal' => 'required|numeric|min:1000',
+        'pesan' => 'nullable|string|max:500',
+    ]);
 
-        $campaign = Campaign::findOrFail($id);
+    $campaign = Campaign::findOrFail($id);
 
-        $campaign->donations()->create([
-            'nama' => $request->nama,
-            'email' => $request->email,
-            'telepon' => $request->telepon,
-            'nominal' => $request->nominal,
-            'pesan' => $request->pesan,
-        ]);
+    // Simpan data awal donasi
+    $donation = $campaign->donations()->create([
+        'nama' => $request->nama,
+        'email' => $request->email,
+        'telepon' => $request->telepon,
+        'nominal' => $request->nominal,
+        'pesan' => $request->pesan,
+    ]);
 
-        return redirect()->back()->with('success', 'Terima kasih atas donasi Anda!');
-    }
+    // Konfigurasi Midtrans
+    Config::$serverKey = config('services.midtrans.server_key');
+    Config::$isProduction = config('services.midtrans.is_production');
+    Config::$isSanitized = true;
+    Config::$is3ds = true;
+
+    $transaction = [
+        'transaction_details' => [
+            'order_id' => 'CMP-' . $donation->id . '-' . time(),
+            'gross_amount' => $donation->nominal,
+        ],
+        'customer_details' => [
+            'first_name' => $donation->nama,
+            'email' => $donation->email,
+            'phone' => $donation->telepon,
+        ],
+    ];
+
+    $snapToken = Snap::getSnapToken($transaction);
+
+    return view('donasi.snap', compact('snapToken'));
+}
+
 }

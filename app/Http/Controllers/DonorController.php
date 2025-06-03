@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Donor;
+use App\Models\User;
 
 class DonorController extends Controller
 {
@@ -12,7 +13,10 @@ class DonorController extends Controller
         $donors = Donor::all();
         $role = auth()->user()->role;
 
-        return view("$role.donors.index", compact('donors'));
+        // Ambil user publik yang berhasil register
+        $publicUsers = User::where('role', 'anggota')->get(); // Ganti 'anggota' jika nama role berbeda
+
+        return view("$role.donors.index", compact('donors', 'publicUsers'));
     }
 
     public function create()
@@ -20,7 +24,6 @@ class DonorController extends Controller
         $role = auth()->user()->role;
         return view("$role.donors.create");
     }
-
 
     public function store(Request $request)
     {
@@ -41,7 +44,6 @@ class DonorController extends Controller
         $role = auth()->user()->role;
         return view("$role.donors.edit", compact('donor'));
     }
-
 
     public function update(Request $request, Donor $donor)
     {

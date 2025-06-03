@@ -5,22 +5,27 @@
 @section('header-subtitle', 'Bantu kami berbagi dengan sesama')
 
 @section('content')
-    <form method="POST" action="{{ route('donasi.store') }}">
+    <form action="{{ route('donasi.pay') }}" method="POST">
         @csrf
 
-        <label for="nama">Nama Donatur</label>
-        <input type="text" id="nama" name="nama" required>
+        <label for="name">Nama Donatur</label>
+        <input type="text" id="name" name="name" required>
 
-        <label for="nominal">Nominal Donasi (Rp)</label>
-        <input type="number" id="nominal" name="nominal" required>
+        <label for="email">Email Donatur</label>
+        <input type="email" id="email" name="email" required>
 
-        <label for="pesan">Pesan atau Doa</label>
-        <textarea id="pesan" name="pesan" rows="4"></textarea>
+        <label for="telepon">Nomor Telepon</label>
+        <input type="text" id="telepon" name="telepon">
+
+        <label for="amount">Nominal Donasi (Rp)</label>
+        <input type="number" id="amount" name="amount" required>
+
+        <label for="message">Pesan atau Doa</label>
+        <textarea id="message" name="message" rows="4"></textarea>
 
         <button type="submit">Kirim Donasi</button>
     </form>
 
-    {{-- Tombol Kembali ke Beranda --}}
     <div style="margin-top: 30px;">
         <a href="{{ url('/') }}" style="
             display: inline-block;

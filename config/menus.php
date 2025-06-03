@@ -37,7 +37,7 @@ return [
             'title' => 'Laporan Pengeluaran',
             'icon' => '📄',
             'route' => 'laporan-pengeluaran.index',
-            'active' => false,
+          
         ],
     ],
     'bendahara' => [
@@ -71,7 +71,7 @@ return [
             'title' => 'Laporan Pengeluaran',
             'icon' => '📄',
             'route' => 'laporan-pengeluaran.index',
-            'active' => false,
+          
         ],
     ],
     'anggota' => [
