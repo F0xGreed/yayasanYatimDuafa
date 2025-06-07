@@ -8,6 +8,8 @@ use Illuminate\Support\Facades\Gate;
 use App\Models\Campaign;
 use App\Policies\CampaignPolicy;
 use Illuminate\Pagination\Paginator;
+use Illuminate\Support\Facades\URL;
+
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -27,6 +29,11 @@ class AppServiceProvider extends ServiceProvider
         Paginator::useBootstrap(); 
         Carbon::setLocale('id');
         Gate::policy(Campaign::class, CampaignPolicy::class);
+
+            if (app()->environment('local')) {
+        URL::forceRootUrl(config('app.url')); // agar asset mengarah ke ngrok
+        URL::forceScheme('https');            // agar https, bukan http
     }
 
+}
 }

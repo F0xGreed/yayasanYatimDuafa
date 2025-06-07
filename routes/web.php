@@ -16,6 +16,10 @@ use App\Models\Campaign;
 use App\Http\Controllers\PengeluaranController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\DonasiTrackingController;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
+
+
 
 
 // ======================
@@ -30,11 +34,6 @@ Route::post('/donasi', [PaymentController::class, 'pay'])->name('donasi.pay');
 Route::get('/payment/success', fn () => view('payment.success'))->name('payment.success');
 Route::get('/payment/pending', fn () => view('payment.pending'))->name('payment.pending');
 Route::get('/payment/failed', fn () => view('payment.failed'))->name('payment.failed');
-
-
-Route::post('midtrans/notification', [PaymentController::class, 'handleNotification'])->withoutMiddleware([\App\Http\Middleware\VerifyCsrfToken::class]);
-
-// Route::any('midtrans/notification', [PaymentController::class, 'handleNotification']);
 
 
 // Halaman form tracking donasi publik

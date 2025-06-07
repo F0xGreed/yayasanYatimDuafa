@@ -88,37 +88,45 @@ class PaymentController extends Controller
     }
 
     public function handleNotification(Request $request)
-    {
-        \Log::info('🎯 Midtrans Webhook Triggered!', [
-    'method' => $request->method(),
-    'headers' => $request->headers->all(),
-    'body' => $request->getContent(),
-]);
-
-        Config::$serverKey = config('services.midtrans.server_key');
-        Config::$isProduction = config('services.midtrans.is_production');
-
-        $notification = new Notification();
-
-        $transaction = $notification->transaction_status;
-        $orderId     = $notification->order_id;
-
-        \Log::info('Notifikasi Midtrans diterima', [
-            'order_id' => $orderId,
-            'status'   => $transaction,
+{
+    try {
+        
+        \Log::info('🔔 Notifikasi Midtrans Masuk!', [
+            'method' => $request->method(),
+            'headers' => $request->headers->all(),
+            'body' => $request->getContent(),
         ]);
 
-        $donation = PublicDonation::where('order_id', $orderId)->first();
+        \Midtrans\Config::$serverKey = config('services.midtrans.server_key');
+        \Midtrans\Config::$isProduction = config('services.midtrans.is_production');
 
+        $notification = new \Midtrans\Notification();
+
+        $transaction = $notification->transaction_status;
+        $orderId = $notification->order_id;
+
+        \Log::info('📦 Update status order', [
+            'order_id' => $orderId,
+            'status' => $transaction,
+        ]);
+
+        $donation = \App\Models\PublicDonation::where('order_id', $orderId)->first();
         if ($donation) {
             $donation->status = $transaction;
             $donation->save();
-
-            \Log::info("Status donasi {$donation->nama} diupdate ke {$transaction}");
+            \Log::info("✅ Order {$orderId} status updated to {$transaction}");
         } else {
-            \Log::warning("Donasi dengan order_id {$orderId} tidak ditemukan");
+            \Log::warning("❌ Order ID {$orderId} not found");
         }
 
-        return response()->json(['status' => 'OK']);
+        return response()->json(['message' => 'OK']);
+    } catch (\Exception $e) {
+        \Log::error('❌ ERROR dari Midtrans Notification: ' . $e->getMessage(), [
+            'trace' => $e->getTraceAsString()
+        ]);
+        return response()->json(['error' => 'Server error'], 500);
     }
+}
+
+
 }
