@@ -13,7 +13,7 @@ return [
             'route' => 'users.index',
         ],
         [
-            'title' => 'Donasi',
+            'title' => 'Donasi Publik',
             'icon' => '💰',
             'route' => 'donations.index',
             
@@ -39,6 +39,12 @@ return [
             'route' => 'laporan-pengeluaran.index',
           
         ],
+        [
+            'title' => 'Galeri',
+            'icon'  => '🖼️',
+            'route' => 'galleries.index',
+        ],
+
     ],
     'bendahara' => [
         [
@@ -47,7 +53,7 @@ return [
             'route' => 'dashboard.bendahara',
         ],
         [
-            'title' => 'Donasi',
+            'title' => 'Donasi Publik',
             'icon' => '💰',
             'route' => 'donations.index',
             
@@ -73,8 +79,14 @@ return [
             'route' => 'laporan-pengeluaran.index',
           
         ],
+        [
+            'title' => 'Galeri',
+            'icon'  => '🖼️',
+            'route' => 'galleries.index',
+        ],
+
     ],
-    'anggota' => [
+        'anggota' => [
         [
             'title' => 'Dashboard',
             'icon' => '🏠',
@@ -84,7 +96,12 @@ return [
             'title' => 'Kegiatan',
             'icon' => '📅',
             'route' => 'campaigns.index',
-            
+        ],
+        [
+            'title' => 'Histori Donasi',
+            'icon' => '🕘',
+            'route' => 'anggota.histori_donasi',
         ],
     ],
+
 ];

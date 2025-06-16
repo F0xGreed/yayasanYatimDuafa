@@ -35,6 +35,7 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
+            flex-wrap: wrap;
         }
 
         .logo {
@@ -42,8 +43,13 @@
             font-weight: 600;
         }
 
+        .nav-links {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
         .nav-links a {
-            margin-left: 20px;
             text-decoration: none;
             color: white;
             font-weight: 500;
@@ -74,37 +80,6 @@
             margin: 0 auto 30px;
         }
 
-        .btn {
-            font-size: 1rem;
-            padding: 12px 24px;
-            margin: 0 10px;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: bold;
-            transition: background-color 0.3s;
-        }
-
-        .btn-donasi {
-            background-color: white;
-            color: #FF7F00;
-        }
-
-        .btn-login {
-            background-color: transparent;
-            color: white;
-            border: 2px solid white;
-        }
-
-        .btn-donasi:hover {
-            background-color: #f1f1f1;
-        }
-
-        .btn-login:hover {
-            background-color: white;
-            color: #FF7F00;
-        }
-
         .campaigns {
             padding: 40px 20px;
             background-color: rgba(255, 255, 255, 0.1);
@@ -131,6 +106,29 @@
             font-size: 0.9rem;
             z-index: 1;
         }
+        
+        .btn-campaign {
+        text-decoration: none;
+        font-weight: bold;
+        color: white;
+        border: 2px solid white;
+        padding: 8px 16px;
+        border-radius: 8px;
+        transition: background-color 0.3s ease;
+        }
+
+        .btn-campaign:hover {
+            background-color: white;
+            color: #FF7F00;
+        }
+
+        @media (max-width: 600px) {
+            .nav-links {
+                flex-direction: column;
+                align-items: flex-end;
+                gap: 8px;
+            }
+        }
     </style>
 </head>
 <body>
@@ -142,18 +140,15 @@
             </span>
         </div>
         <div class="nav-links">
-            <a href="{{ route('login') }}" class="btn-login">Login</a>
+            <a href="{{ route('donasi') }}">Donasi Publik</a>
+            <a href="{{ route('galeri') }}">Galeri</a>
+            <a href="{{ route('login') }}">Login</a>
         </div>
     </header>
 
     <main>
         <h1>Berbagi Kebahagiaan Bersama</h1>
         <p>Bantu anak-anak yatim dan dhuafa mendapatkan kehidupan yang lebih layak melalui program donasi dan kegiatan sosial kami.</p>
-        <div>
-            <a href="{{ route('donasi') }}" class="btn btn-donasi">Donasi Publik</a>
-            <a href="{{ route('donasi.tracking.form') }}" class="btn btn-login" style="margin-left: 10px;">🔍 Lacak Donasi</a>
-            <a href="{{ route('login') }}" class="btn btn-login" style="margin-left: 10px;">Login</a>
-        </div>
     </main>
 
     <section class="campaigns">
@@ -177,7 +172,7 @@
                             ->translatedFormat('d F Y') 
                     }}
                 </p>
-                <a href="{{ route('campaigns.show', $campaign->id) }}" class="btn btn-donasi">Donasi ke Kampanye</a>
+                <a href="{{ route('campaigns.show', $campaign->id) }}" class="btn-campaign">Donasi ke Kampanye</a>
             </div>
         @empty
             <p style="text-align: center;">Belum ada kampanye aktif saat ini.</p>

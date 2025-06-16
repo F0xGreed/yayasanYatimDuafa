@@ -14,11 +14,11 @@
                     {{ session('order_id') }}
                 </div>
 
-                <p style="margin-top: 10px;">
+                <!-- <p style="margin-top: 10px;">
                     🔍 <a href="{{ route('donasi.tracking.form') }}" style="color: #007bff;">
                         Klik di sini untuk lacak status donasi
                     </a>
-                </p>
+                </p> -->
             </div>
         @endif
 

@@ -18,6 +18,11 @@ use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\DonasiTrackingController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\DonasiBerhasilMail;
+use App\Models\PublicDonation;
+use App\Http\Controllers\GalleryController;
+
 
 
 
@@ -41,7 +46,7 @@ Route::get('/donasi/tracking', [DonasiTrackingController::class, 'showForm'])->n
 // Proses pencarian berdasarkan order_id
 Route::get('/donasi/tracking/result', [DonasiTrackingController::class, 'showResult'])->name('donasi.tracking.result');
 
-
+Route::get('/galeri', [GalleryController::class, 'publicGallery'])->name('galeri');
 
 // ========================
 // Halaman Landing (Publik)
@@ -60,7 +65,7 @@ Route::get('/', function () {
 // Kampanye Donasi Publik
 // =====================
 Route::get('/campaigns/{id}', [CampaignController::class, 'show'])->name('campaigns.show');
-Route::post('/campaigns/{id}/donate', [CampaignController::class, 'donate'])->name('campaigns.donate');
+Route::post('/campaigns/{id}/donate', [PaymentController::class, 'payCampaign'])->name('campaigns.donate');
 
 // =====================
 // Kampanye (Semua Role Login Bisa Akses Index)
@@ -77,19 +82,31 @@ Route::middleware(['auth', 'role:admin,bendahara'])->group(function () {
 });
 
 
-Route::middleware(['auth'])->group(function () {
-    Route::get('/laporan-pengeluaran', [PengeluaranController::class, 'index'])
-        ->name('laporan-pengeluaran.index')
-        ->middleware('role:admin,bendahara');
+Route::middleware(['auth', 'role:admin,bendahara'])->group(function () {
+    Route::resource('laporan-pengeluaran', PengeluaranController::class)
+        ->parameters(['laporan-pengeluaran' => 'pengeluaran']) // ✅ Tambahkan baris ini
+        ->except(['show']);
 
     Route::get('/laporan-pengeluaran/export-excel', [PengeluaranController::class, 'exportExcel'])
-        ->name('laporan-pengeluaran.exportExcel')
-        ->middleware('role:admin,bendahara');
+        ->name('laporan-pengeluaran.exportExcel');
 
     Route::get('/laporan-pengeluaran/export-pdf', [PengeluaranController::class, 'exportPDF'])
-        ->name('laporan-pengeluaran.exportPDF')
-        ->middleware('role:admin,bendahara');
+        ->name('laporan-pengeluaran.exportPDF');
 });
+
+
+
+Route::middleware(['auth'])->group(function () {
+    Route::get('/anggota/histori-donasi', [PaymentController::class, 'historiDonasi'])
+        ->name('anggota.histori_donasi');
+});
+
+
+Route::middleware(['auth', 'role:admin,bendahara'])->group(function () {
+    Route::resource('galleries', GalleryController::class);
+});
+
+
 
 // ===================================================
 // Kampanye (CRUD) - Hanya Admin dan Bendahara

@@ -7,6 +7,10 @@ use Midtrans\Config;
 use Midtrans\Snap;
 use Midtrans\Notification;
 use App\Models\PublicDonation;
+use App\Models\Campaign;
+use App\Models\CampaignDonation;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\DonasiBerhasilMail;
 
 class PaymentController extends Controller
 {
@@ -28,6 +32,9 @@ class PaymentController extends Controller
         ];
     }
 
+    /**
+     * Proses donasi publik (donasi umum tanpa kampanye).
+     */
     public function pay(Request $request)
     {
         $validated = $request->validate([
@@ -40,6 +47,7 @@ class PaymentController extends Controller
 
         try {
             $donation = PublicDonation::create([
+                'user_id' => auth()->id(),
                 'nama'    => $validated['name'],
                 'email'   => $validated['email'],
                 'telepon' => $validated['telepon'] ?? '-',
@@ -47,19 +55,10 @@ class PaymentController extends Controller
                 'pesan'   => $validated['message'] ?? '-',
             ]);
 
-            if (!$donation || !$donation->id) {
-                \Log::error('Gagal menyimpan donasi!', ['data' => $donation]);
-                abort(500, 'Donasi gagal disimpan.');
-            }
-
             $orderId = 'DON-' . $donation->id . '-' . time();
-
-            // Simpan order_id dan status awal
             $donation->order_id = $orderId;
             $donation->status = 'pending';
             $donation->save();
-
-            session()->flash('order_id', $orderId);
 
             $params = [
                 'transaction_details' => [
@@ -72,14 +71,12 @@ class PaymentController extends Controller
                 ],
             ];
 
-            \Log::info('Proses Midtrans', ['params' => $params]);
-
-            $response = Snap::createTransaction($params);
-            $snapToken = $response->token;
+            \Log::info('📤 Proses Donasi Publik ke Midtrans', $params);
+            $snapToken = Snap::createTransaction($params)->token;
 
             return view('payment.snap', compact('snapToken'));
         } catch (\Exception $e) {
-            \Log::error('Error saat proses donasi publik', [
+            \Log::error('❌ Gagal Proses Donasi Publik', [
                 'message' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
@@ -87,46 +84,120 @@ class PaymentController extends Controller
         }
     }
 
-    public function handleNotification(Request $request)
+    /**
+     * Proses donasi kampanye.
+     */
+    public function payCampaign(Request $request, $campaignId)
+    {
+        $validated = $request->validate([
+            'nama' => 'required|string|max:255',
+            'email' => 'required|email',
+            'telepon' => 'required|string|max:20',
+            'nominal' => 'required|numeric|min:1000',
+            'pesan' => 'nullable|string|max:500',
+        ]);
+
+        $campaign = Campaign::findOrFail($campaignId);
+
+        $donation = CampaignDonation::create([
+            'user_id'     => auth()->id(),
+            'campaign_id' => $campaign->id,
+            'nama'        => $validated['nama'],
+            'email'       => $validated['email'],
+            'telepon'     => $validated['telepon'],
+            'nominal'     => $validated['nominal'],
+            'pesan'       => $validated['pesan'] ?? '-',
+        ]);
+
+        $orderId = 'CMP-' . $donation->id . '-' . time();
+        $donation->order_id = $orderId;
+        $donation->status = 'pending';
+        $donation->save();
+
+        $params = [
+            'transaction_details' => [
+                'order_id' => $orderId,
+                'gross_amount' => (int) round($donation->nominal),
+            ],
+            'customer_details' => [
+                'first_name' => $donation->nama,
+                'email' => $donation->email,
+            ],
+        ];
+
+        \Log::info('📤 Proses Donasi Kampanye ke Midtrans', $params);
+        $snapToken = Snap::createTransaction($params)->token;
+
+        return view('payment.snap', compact('snapToken'));
+    }
+
+    /**
+     * Menangani notifikasi dari Midtrans.
+     */
+    
+public function handleNotification(Request $request)
 {
     try {
-        
-        \Log::info('🔔 Notifikasi Midtrans Masuk!', [
+        \Log::info('🔔 Midtrans Notification Masuk', [
             'method' => $request->method(),
-            'headers' => $request->headers->all(),
             'body' => $request->getContent(),
         ]);
 
-        \Midtrans\Config::$serverKey = config('services.midtrans.server_key');
-        \Midtrans\Config::$isProduction = config('services.midtrans.is_production');
-
-        $notification = new \Midtrans\Notification();
-
+        $notification = new Notification();
         $transaction = $notification->transaction_status;
         $orderId = $notification->order_id;
 
-        \Log::info('📦 Update status order', [
-            'order_id' => $orderId,
+        \Log::info("📦 Update status transaksi untuk order_id {$orderId}", [
             'status' => $transaction,
         ]);
 
-        $donation = \App\Models\PublicDonation::where('order_id', $orderId)->first();
+        if (str_starts_with($orderId, 'DON-')) {
+            $donation = PublicDonation::where('order_id', $orderId)->first();
+        } elseif (str_starts_with($orderId, 'CMP-')) {
+            $donation = CampaignDonation::where('order_id', $orderId)->first();
+        } else {
+            \Log::warning("⚠️ Order ID tidak dikenali: {$orderId}");
+            return response()->json(['error' => 'Unknown order ID'], 400);
+        }
+
         if ($donation) {
             $donation->status = $transaction;
             $donation->save();
-            \Log::info("✅ Order {$orderId} status updated to {$transaction}");
+
+            if ($transaction === 'settlement') {
+                Mail::to($donation->email)->send(new DonasiBerhasilMail($donation));
+                \Log::info("✉️ Email berhasil dikirim ke {$donation->email}");
+            }
+
+            \Log::info("✅ Order {$orderId} diperbarui ke status {$transaction}");
         } else {
-            \Log::warning("❌ Order ID {$orderId} not found");
+            \Log::warning("❌ Donasi tidak ditemukan untuk order ID {$orderId}");
         }
 
         return response()->json(['message' => 'OK']);
     } catch (\Exception $e) {
-        \Log::error('❌ ERROR dari Midtrans Notification: ' . $e->getMessage(), [
-            'trace' => $e->getTraceAsString()
+        \Log::error('❌ Error Notifikasi Midtrans', [
+            'error' => $e->getMessage(),
+            'trace' => $e->getTraceAsString(),
         ]);
         return response()->json(['error' => 'Server error'], 500);
     }
 }
 
 
+    /**
+     * Menampilkan histori donasi (publik & kampanye) oleh user yang login.
+     */
+    public function historiDonasi()
+    {
+        $userId = auth()->id();
+
+        $publicDonations = PublicDonation::where('user_id', $userId)->latest()->get();
+        $campaignDonations = CampaignDonation::where('user_id', $userId)
+            ->with('campaign')
+            ->latest()
+            ->get();
+
+        return view('anggota.histori_donasi', compact('publicDonations', 'campaignDonations'));
+    }
 }

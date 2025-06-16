@@ -60,4 +60,52 @@ class PengeluaranController extends Controller
         $pdf = Pdf::loadView($view, compact('pengeluarans'));
         return $pdf->stream('laporan_pengeluaran.pdf');
     }
+    public function create()
+{
+    $view = auth()->user()->role === 'admin'
+        ? 'admin.pengeluaran.create'
+        : 'bendahara.pengeluaran.create';
+
+    return view($view);
+}
+
+public function store(Request $request)
+{
+    $request->validate([
+        'tanggal' => 'required|date',
+        'deskripsi' => 'required|string|max:255',
+        'jumlah' => 'required|numeric|min:0',
+        'kategori' => 'required|string|max:100',
+    ]);
+
+    Pengeluaran::create($request->all());
+
+    return redirect()->route('laporan-pengeluaran.index')->with('success', 'Pengeluaran berhasil ditambahkan.');
+}
+
+public function edit(Pengeluaran $pengeluaran)
+{
+    $view = auth()->user()->role === 'admin'
+        ? 'admin.pengeluaran.edit'
+        : 'bendahara.pengeluaran.edit';
+
+    return view($view, compact('pengeluaran'));
+}
+
+public function update(Request $request, Pengeluaran $pengeluaran)
+{
+    $pengeluaran->update($request->all());
+
+    return redirect()->route('laporan-pengeluaran.index')->with('success', 'Pengeluaran berhasil diperbarui.');
+}
+
+
+
+public function destroy(Pengeluaran $pengeluaran)
+{
+    $pengeluaran->delete();
+
+    return redirect()->route('laporan-pengeluaran.index')->with('success', 'Pengeluaran berhasil dihapus.');
+}
+
 }

@@ -7,7 +7,11 @@
 @endpush
 
 @section('content')
-    <h4 class="mb-4">📄 Laporan Pengeluaran + (CRUD untuk tambah laporan pengeluaran)</h4>
+    <h4 class="mb-4">📄 Laporan Pengeluaran</h4>
+
+    <div class="mb-3">
+        <a href="{{ route('laporan-pengeluaran.create') }}" class="btn btn-primary">➕ Tambah Pengeluaran</a>
+    </div>
 
     <form method="GET" action="{{ route('laporan-pengeluaran.index') }}" class="row g-3 mb-4">
         <div class="col-md-4">
@@ -38,23 +42,34 @@
                     <th>Deskripsi</th>
                     <th>Jumlah</th>
                     <th>Kategori</th>
+                    <th>Aksi</th>
                 </tr>
             </thead>
-            <tbody>
-                @forelse($pengeluarans as $index => $item)
-                    <tr>
-                        <td>{{ $loop->iteration }}</td>
-                        <td>{{ \Carbon\Carbon::parse($item->tanggal)->format('d-m-Y') }}</td>
-                        <td>{{ $item->deskripsi }}</td>
-                        <td>Rp{{ number_format($item->jumlah, 0, ',', '.') }}</td>
-                        <td>{{ $item->kategori }}</td>
-                    </tr>
-                @empty
-                    <tr>
-                        <td colspan="5" class="text-center">Tidak ada data pengeluaran.</td>
-                    </tr>
-                @endforelse
-            </tbody>
+           <tbody>
+    @forelse($pengeluarans as $index => $item)
+        <tr>
+            <td>{{ $loop->iteration }}</td>
+            <td>{{ \Carbon\Carbon::parse($item->tanggal)->format('d-m-Y') }}</td>
+            <td>{{ $item->deskripsi }}</td>
+            <td>Rp{{ number_format($item->jumlah, 0, ',', '.') }}</td>
+            <td>{{ $item->kategori }}</td>
+            <td>
+                <a href="{{ route('laporan-pengeluaran.edit', ['laporan_pengeluaran' => $item->id]) }}" class="btn btn-sm btn-warning">✏️ Edit</a>
+                
+                <form action="{{ route('laporan-pengeluaran.destroy', ['laporan_pengeluaran' => $item->id]) }}" method="POST" style="display:inline-block;" onsubmit="return confirm('Yakin ingin menghapus?')">
+                    @csrf
+                    @method('DELETE')
+                    <button type="submit" class="btn btn-sm btn-danger">🗑️ Hapus</button>
+                </form>
+            </td>
+        </tr>
+    @empty
+        <tr>
+            <td colspan="6" class="text-center">Tidak ada data pengeluaran.</td>
+        </tr>
+    @endforelse
+</tbody>
+
         </table>
     </div>
 
