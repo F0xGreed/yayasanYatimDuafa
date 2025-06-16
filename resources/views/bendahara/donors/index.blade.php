@@ -50,6 +50,7 @@
         </tr>
     </thead>
     <tbody>
+        
         @forelse ($publicUsers as $user)
         <tr>
             <td>{{ $user->name }}</td>

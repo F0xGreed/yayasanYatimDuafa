@@ -138,41 +138,58 @@ class PaymentController extends Controller
 public function handleNotification(Request $request)
 {
     try {
-        \Log::info('🔔 Midtrans Notification Masuk', [
-            'method' => $request->method(),
-            'body' => $request->getContent(),
+        \Log::info('📥 Webhook diterima', [
+            'headers' => $request->headers->all(),
+            'raw_body' => $request->getContent(),
         ]);
 
-        $notification = new Notification();
-        $transaction = $notification->transaction_status;
-        $orderId = $notification->order_id;
+        $transaction = null;
+        $orderId = null;
 
-        \Log::info("📦 Update status transaksi untuk order_id {$orderId}", [
-            'status' => $transaction,
-        ]);
+        try {
+            // Coba pakai Midtrans SDK Notification
+            $notification = new \Midtrans\Notification();
+            $transaction = $notification->transaction_status;
+            $orderId = $notification->order_id;
+            \Log::info("✅ Parsed via SDK", compact('transaction', 'orderId'));
+        } catch (\Exception $e) {
+            // Jika gagal, fallback ke manual json decode
+            \Log::warning("⚠️ Gagal parsing dengan SDK Midtrans, fallback ke manual: " . $e->getMessage());
+            $data = json_decode($request->getContent(), true);
+            $transaction = $data['transaction_status'] ?? 'unknown';
+            $orderId = $data['order_id'] ?? 'unknown';
+            \Log::info("✅ Parsed manually", compact('transaction', 'orderId'));
+        }
 
+        if (!$orderId || $orderId === 'unknown') {
+            \Log::warning("❗ Order ID tidak ditemukan dari payload");
+            return response()->json(['error' => 'Invalid payload'], 400);
+        }
+
+        // Cek apakah ini donasi publik atau kampanye
         if (str_starts_with($orderId, 'DON-')) {
-            $donation = PublicDonation::where('order_id', $orderId)->first();
+            $donation = \App\Models\PublicDonation::where('order_id', $orderId)->first();
         } elseif (str_starts_with($orderId, 'CMP-')) {
-            $donation = CampaignDonation::where('order_id', $orderId)->first();
+            $donation = \App\Models\CampaignDonation::where('order_id', $orderId)->first();
         } else {
             \Log::warning("⚠️ Order ID tidak dikenali: {$orderId}");
             return response()->json(['error' => 'Unknown order ID'], 400);
         }
 
-        if ($donation) {
-            $donation->status = $transaction;
-            $donation->save();
-
-            if ($transaction === 'settlement') {
-                Mail::to($donation->email)->send(new DonasiBerhasilMail($donation));
-                \Log::info("✉️ Email berhasil dikirim ke {$donation->email}");
-            }
-
-            \Log::info("✅ Order {$orderId} diperbarui ke status {$transaction}");
-        } else {
+        if (!$donation) {
             \Log::warning("❌ Donasi tidak ditemukan untuk order ID {$orderId}");
+            return response()->json(['error' => 'Donation not found'], 404);
         }
+
+        $donation->status = $transaction;
+        $donation->save();
+
+        if ($transaction === 'settlement') {
+            \Mail::to($donation->email)->send(new \App\Mail\DonasiBerhasilMail($donation));
+            \Log::info("✉️ Email berhasil dikirim ke {$donation->email}");
+        }
+
+        \Log::info("✅ Order {$orderId} diperbarui ke status {$transaction}");
 
         return response()->json(['message' => 'OK']);
     } catch (\Exception $e) {
@@ -183,6 +200,7 @@ public function handleNotification(Request $request)
         return response()->json(['error' => 'Server error'], 500);
     }
 }
+
 
 
     /**

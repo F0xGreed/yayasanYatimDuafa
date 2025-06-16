@@ -26,7 +26,6 @@
                 <select name="role" class="form-select" required>
                     <option value="admin">Admin</option>
                     <option value="bendahara">Bendahara</option>
-                    <option value="anggota">Anggota</option>
                 </select>
             </div>
 

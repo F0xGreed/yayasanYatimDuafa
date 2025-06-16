@@ -69,10 +69,24 @@ class DashboardController extends Controller
             'totalDonasiKampanye'
         ));
     } else {
-        return view('anggota.dashboard', compact(
-            'totalSaldo',
-            'donasiTerbaru'
-        ));
-    }
+    // Hanya donasi milik user yang login
+    $userDonasiPublik = PublicDonation::where('user_id', $user->id)->get();
+    $userDonasiKampanye = CampaignDonation::where('user_id', $user->id)->get();
+
+    // Total donasi milik user
+    $totalDonasiUser = $userDonasiPublik->sum('nominal') + $userDonasiKampanye->sum('nominal');
+
+    // Gabungan 5 donasi terbaru milik user
+    $donasiTerbaru = $userDonasiPublik
+        ->concat($userDonasiKampanye)
+        ->sortByDesc('created_at')
+        ->take(5);
+
+    return view('anggota.dashboard', compact(
+        'totalDonasiUser',
+        'donasiTerbaru'
+    ));
+}
+
 }
 }

@@ -9,9 +9,10 @@
         <div class="col-md-12">
             <div class="card shadow-sm border-start border-success border-4">
                 <div class="card-body">
-                    <h5 class="fw-bold mb-1">💰 Total Donasi Yayasan</h5>
-                    <h3 class="text-success">Rp {{ number_format($totalSaldo, 0, ',', '.') }}</h3>
-                    <small class="text-muted">Total dari seluruh donasi publik dan kampanye</small>
+                    <h5 class="fw-bold mb-1">💰 Total Donasi Saya</h5>
+                    <h3 class="text-success">Rp {{ number_format($totalDonasiUser, 0, ',', '.') }}</h3>
+                    <small class="text-muted">Total dari semua donasi publik dan kampanye yang Anda lakukan</small>
+
                 </div>
             </div>
         </div>
@@ -30,7 +31,6 @@
                             <table class="table table-bordered table-hover">
                                 <thead class="table-light">
                                     <tr>
-                                        <th>Nama Donatur</th>
                                         <th>Nominal</th>
                                         <th>Jenis</th>
                                         <th>Tanggal</th>
@@ -39,7 +39,6 @@
                                 <tbody>
                                     @foreach($donasiTerbaru as $d)
                                     <tr>
-                                        <td>{{ $d->nama }}</td>
                                         <td>Rp {{ number_format($d->nominal, 0, ',', '.') }}</td>
                                         <td>
                                             @if(isset($d->campaign_id))

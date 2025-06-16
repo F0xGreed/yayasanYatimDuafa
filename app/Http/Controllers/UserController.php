@@ -10,10 +10,11 @@ use Illuminate\Support\Str;
 class UserController extends Controller
 {
     public function index()
-    {
-        $users = User::paginate(10);
-        return view('admin.users.index', compact('users'));
-    }
+{
+    $users = User::whereIn('role', ['admin', 'bendahara'])->paginate(10);
+    return view('admin.users.index', compact('users'));
+}
+
     
     public function create()
     {
